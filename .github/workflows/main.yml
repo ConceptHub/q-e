@@ -1,0 +1,24 @@
+name: Mirror
+
+on:
+  schedule:
+    - cron: '0 16 * * *'
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Keep branch up to date with upstream
+        run: |
+          cd ${{ github.RUNNER_TEMP }}
+          git clone https://gitlab.com/QEF/q-e.git
+          cd q-e
+          git remote add mirror https://${{ github.repository_owner }}:${{ github.token }}@github.com/${{ github.repository }}
+          git push mirror develop
